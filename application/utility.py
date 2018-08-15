@@ -10,7 +10,6 @@ import pandas as pd
 import network
 import json
 
-
 def preprocess_img(data_dir):
     train_dir = data_dir + '/train'
     valid_dir = data_dir + '/valid'
@@ -101,10 +100,9 @@ def process_image(image):
 
     return img_tensor
 
-def imshow(image, ax=None, title=None):
-    if ax is None:
-        fig, ax = plt.subplots()
-    
+def resultdisplay(image, probabilities, classes, top_k):
+    #show image
+    fig, ax = plt.subplots()
     # PyTorch tensors assume the color channel is the first dimension
     # but matplotlib assumes is the third dimension
     image = np.squeeze(image.numpy(), axis=0).transpose((1, 2, 0))
@@ -118,29 +116,7 @@ def imshow(image, ax=None, title=None):
     image = np.clip(image, 0, 1)
     ax.imshow(image)
     
-    return ax
-
-def torch_model(arch):
-     try: model = getattr(models, arch)(pretrained=True)
-     except:
-         print("%r is not valid torchvision model" % arch)
-         raise
-     return model
-
-def get_class(classes, checkpoint, category_names):
-    with open(category_names, 'r') as f:
-        cat_to_name = json.load(f)
-
-    class_to_idx = torch.load(checkpoint)['class_idx'] 
-    idx_to_class = {idx: pic for pic, idx in class_to_idx.items()} #geta dict with mapping (class index, class 'name')
-    names = []
-    for i in classes:
-        category = idx_to_class[i] #convert index of top5 to class number
-        name = cat_to_name[category] #convert category/class number to flower name
-        names.append(name)
-    return names
-
-def show_classes(probabilities, classes, top_k):
+    #show probabilities bargraph
     fig, ax = plt.subplots()
     ax.barh(np.arange(top_k), probabilities)
     ax.set_aspect(0.1)
@@ -149,3 +125,57 @@ def show_classes(probabilities, classes, top_k):
     ax.set_title('Class Probability')
     ax.set_xlim(0,max(probabilities)+0.1)
     plt.tight_layout()
+    plt.show()
+       
+    return ax
+
+def torch_model(arch):
+     try: 
+            model = getattr(models, arch)(pretrained=True)
+            return model
+     except AttributeError:
+         print("%s is not valid torchvision model" % arch)
+         raise SystemExit
+     else:
+        print("error loading model")
+        raise SystemExit
+
+def get_class(classes, checkpoint, category_names):
+    class_to_idx = torch.load(checkpoint)['class_idx'] 
+    idx_to_class = {idx: pic for pic, idx in class_to_idx.items()} #geta dict with mapping (class index, class 'name')
+    
+    if(category_names != None): #take index number, change to class number, and then to flower name
+        names = []
+        with open(category_names, 'r') as f:
+            cat_to_name = json.load(f)
+
+        for i in classes:
+            category = idx_to_class[i] #convert index of top5 to class number
+            name = cat_to_name[category] #convert category/class number to flower name
+            names.append(name)
+        return names
+    
+    else: #we just want to take the index number and change it to real class number
+        class_id = []
+        for i in classes:
+            class_id.append(idx_to_class[i])
+        return class_id
+
+def show_classes(probabilities, classes, top_k):
+    print('--------Predictions for Image--------')
+    i = 0
+    while (i < top_k):
+        print('%*s. Class: %*s. Pr= %.4f'%(7, i+1, 3, classes[i], probabilities[i]))
+        i += 1
+        
+def get_input_size(model, arch):
+    input_size = 0
+    
+    if('vgg' in arch): return model.classifier[0].in_features
+    elif('densenet' in arch): return model.classifier.in_features
+    elif('squeezenet' in arch): return model.classifier[1].in_channels
+    elif(('resnet' in arch) or ('inception'in arch) ): return model.fc.in_features
+    elif('alexnet' in arch): return model.classifier[1].in_features
+        
+    if(input_size == 0): raise Error    
+    return input_size
