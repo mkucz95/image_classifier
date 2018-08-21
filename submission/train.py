@@ -12,8 +12,8 @@ import utility
 
 parser = argparse.ArgumentParser()
 parser.add_argument('data_dir', action='store', help='directory containing images')
-parser.add_argument('--save_dir', action='store', nargs=1, help='save trained checkpoint to this directory' )
-parser.add_argument('--arch', action='store', nargs=1, help='what kind of pretrained architecture to use', default='vgg19')
+parser.add_argument('--save_dir', action='store', help='save trained checkpoint to this directory' )
+parser.add_argument('--arch', action='store', help='what kind of pretrained architecture to use', default='vgg19')
 parser.add_argument('--gpu', action='store_true', help='use gpu to train model')
 parser.add_argument('--epochs', action='store', help='# of epochs to train', type=int, default=4)
 parser.add_argument('--learning_rate', action='store', help='which learning rate to start with', type=float, default=0.05)
@@ -33,9 +33,9 @@ for param in model.parameters():
 #params are now frozen so that we do not backprop thru them again
 
 #calculate input size into the network classifier
-input_size = model.classifier[0].in_features
+input_size = utility.get_input_size(model, args.arch)
 
-model.classifier = network.Network(input_size, args.output_size, args.hidden_units, drop_p=0.35)
+model.classifier = network.Network(input_size, args.output_size, [args.hidden_units], drop_p=0.35)
 
 #define the loss function and the optimization parameters
 criterion = nn.NLLLoss() #want nllloss because we do the logsoftmax as our output activation

@@ -13,7 +13,7 @@ import utility
 parser = argparse.ArgumentParser()
 parser.add_argument('input', action='store', help='path to image to be classified')
 parser.add_argument('checkpoint', action='store', help='path to stored model')
-parser.add_argument('--top_k', action='store',nargs=1, type=int, default=5, help='how many most probable classes to print out')
+parser.add_argument('--top_k', action='store', type=int, default=1, help='how many most probable classes to print out')
 parser.add_argument('--category_names', action='store', help='file which maps classes to names')
 parser.add_argument('--gpu', action='store_true', help='use gpu to infer classes')
 args=parser.parse_args()
@@ -33,7 +33,10 @@ classes = result[1][0].cpu().numpy() #index of top5 probabilities
 
 if(args.category_names != None): 
     classes = utility.get_class(classes, args.checkpoint, args.category_names)
+else:
+    classes=utility.get_class(classes, args.checkpoint, None)
 
-utility.imshow(img.to('cpu'), ax=None)
+#utility.resultdisplay(img.to('cpu'), top_probs, classes, args.top_k)
+# cannot get matplotlib to work, get: QXcbConnection: Could not connect to display :1 Aborted (core dumped)
 utility.show_classes(top_probs, classes, args.top_k)
     
