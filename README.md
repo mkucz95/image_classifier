@@ -5,7 +5,7 @@ Project code for Udacity's AI Programming with Python Nanodegree program. In thi
 The project development (part 1) is where I created and trained the network.
 The application part of the project is taking what I made and applying it to a command line, argument based, generalization that can be used to train and predict.
 
-## [Click for NN Development](http://htmlpreview.github.com/?https://github.com/mkucz95/image_classifier/blob/master/development/Image%20Classifier%20Project.html)
+## [Click for NN Development](https://github.com/mkucz95/image_classifier/blob/master/development/Image%20Classifier%20Project.ipynb)
 
 ## Part 2 - Building the command line application
 Now that you've built and trained a deep neural network on the flower data set, it's time to convert it into an application that others can use. Your application should be a pair of Python scripts that run from the command line. For testing, you should use the checkpoint you saved in the first part.
